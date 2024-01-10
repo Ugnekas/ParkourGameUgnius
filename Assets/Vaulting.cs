@@ -4,47 +4,53 @@ using UnityEngine;
 
 public class Vaulting : MonoBehaviour
 {
-    public float vaultHeight = 1.5f; // Adjust this based on your game's requirements
-    public LayerMask vaultableLayers; // Define layers that can be vaulted over
-    public float vaultForce = 5f; // Adjust this based on your game's feel
+    public float climbDistance = 1f;
+    public float climbSpeed = 5f; // Adjust this value to control the climbing speed
 
-    private bool isVaulting = false;
+    private bool isClimbing = false;
+    private Vector3 targetPosition;
+    public LayerMask vaultableLayer;
+    //private Animator anim;
+
+    void Start()
+    {
+        //anim = GetComponent<Animator>();
+    }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E) && !isVaulting)
+        if (Input.GetKeyDown(KeyCode.Space) && !isClimbing)
         {
-            TryVault();
+            TryClimb();
+        }
+
+        if (isClimbing)
+        {
+            MoveToTargetPosition();
         }
     }
 
-    void TryVault()
+    void TryClimb()
     {
         RaycastHit hit;
-
-        if (Physics.Raycast(transform.position, transform.forward, out hit, 1.0f, vaultableLayers))
+        if (Physics.Raycast(transform.position, transform.forward, out hit, climbDistance, vaultableLayer))
         {
-            StartCoroutine(VaultSequence(hit.point));
+            targetPosition = hit.transform.position + Vector3.up * hit.transform.localScale.y / 2f;
+            isClimbing = true;
+            //anim.SetBool("isVaulting", true);
         }
     }
 
-    IEnumerator VaultSequence(Vector3 targetPosition)
+    void MoveToTargetPosition()
     {
-        isVaulting = true;
+        // Gradually move the player to the target position
+        transform.position = Vector3.Lerp(transform.position, targetPosition, climbSpeed * Time.deltaTime);
 
-        // Calculate the target position for the player to vault to
-        Vector3 targetVaultPosition = new Vector3(targetPosition.x, targetPosition.y + vaultHeight, targetPosition.z);
-
-        // Calculate the vault direction
-        Vector3 vaultDirection = (targetVaultPosition - transform.position).normalized;
-
-        // Apply force to the Rigidbody for a physics-based vault
-        GetComponent<Rigidbody>().AddForce(vaultDirection * vaultForce, ForceMode.Impulse);
-
-        // Wait for the player to complete the vault
-        yield return new WaitForSeconds(0.5f); // Adjust this based on your game's feel
-
-        // Reset the flag after completing the vault
-        isVaulting = false;
+        // Check if the player has reached the target position
+        if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+        {
+            isClimbing = false;
+            //anim.SetBool("isVaulting", false);
+        }
     }
 }
