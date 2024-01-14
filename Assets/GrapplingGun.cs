@@ -9,6 +9,7 @@ public class GrapplingGun : MonoBehaviour
     public LayerMask whatIsGrappable;
     public Transform gunTip, camera, player;
     public float maxDistance = 100f;
+  
     public float grapplingSpeed;
     private SpringJoint joint;
     private Rigidbody rb;
@@ -35,6 +36,7 @@ public class GrapplingGun : MonoBehaviour
     void LateUpdate()
     {
         DrawRope();
+        
     }
 
     void StartGrapple()
@@ -53,8 +55,8 @@ public class GrapplingGun : MonoBehaviour
             joint.minDistance = distanceFromPoint * 0.25f;
 
             joint.spring = 7f;
-            joint.damper = 10f;
-            joint.massScale = 4.5f;
+            joint.damper = 100f;
+            joint.massScale = 10f;
 
             lr.positionCount = 2;
 
@@ -79,4 +81,6 @@ public class GrapplingGun : MonoBehaviour
         lr.positionCount = 0;
         Destroy(joint);
     }
+
+      
 }
